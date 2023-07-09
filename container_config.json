@@ -1,0 +1,38 @@
+{
+	"settings": {
+		"editor.formatOnSave": true,
+		// "python.formatting.blackPath": "/usr/local/py-utils/bin/black", // macOS
+		"python.formatting.blackPath": "/root/.local/bin/black", // Debian docker
+		"python.formatting.provider": "black",
+		"python.languageServer": "Pylance",
+		"python.linting.enabled": true,
+		// "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy", // macOS
+		"python.linting.mypyPath": "/root/.local/bin/mypy", // Debian docker
+		"mypy.dmypyExecutable": "/root/.local/bin/dmypy", // Needed for Debian docker
+		"python.linting.flake8Args": [
+			"--ignore=F403",
+			"--max-line-length=80"
+		],
+		"python.linting.flake8Enabled": true,
+		"isort.path": [
+			// 	"/usr/local/py-utils/bin/isort" // macOS
+			"/root/.local/bin/isort" // Debian docker
+		],
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": true
+			}
+		}
+	},
+	"extensions": [
+		"DavidAnson.vscode-markdownlint",
+		"matangover.mypy",
+		"ms-python.black-formatter",
+		"ms-python.flake8",
+		"ms-python.isort",
+		"ms-python.python",
+		"ms-python.vscode-pylance"
+	],
+	"workspaceFolder": "/app"
+}
