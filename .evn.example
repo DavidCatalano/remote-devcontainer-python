@@ -1,0 +1,8 @@
+DEV_ENV=1 # 1 for True, anything else for False
+DEV_NAME=david # Login username on remote dev server
+DEV_HOST=devbox # Remote dev server hostname
+PROJECT_NAME=pydev
+REPO= # todo, e.g. {this repo git}
+PYVER= # todo, e.g. "latest" or "3.11-bookworm" see https://hub.docker.com/_/python
+
+VSCODE_CONTAINER_CONFIG_PATH=~/Library/Application\ Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/nameConfigs
