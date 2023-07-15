@@ -13,6 +13,10 @@ ENV DEV_NAME=${DEV_NAME}
 ENV DEV_HOST=${DEV_HOST}
 ENV CONTAINER_NAME=${CONTAINER_NAME}
 
+# Install Git
+RUN apt-get update && \
+    apt-get install -y git
+
 # Install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade -r requirements.txt

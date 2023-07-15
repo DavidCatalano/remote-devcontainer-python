@@ -3,7 +3,11 @@
 		"editor.formatOnSave": true,
 		// "python.formatting.blackPath": "/usr/local/py-utils/bin/black", // macOS
 		"python.formatting.blackPath": "/root/.local/bin/black", // Debian docker
-		"python.formatting.provider": "black",
+		"python.formatting.blackArgs": [
+			"--line-length",
+			"80"
+		],
+		"python.formatting.provider": "none",
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": true,
 		// "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy", // macOS
