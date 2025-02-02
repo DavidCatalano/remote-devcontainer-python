@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     pip install --upgrade pip uv && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set build-time arguments
+# Set build-time arguments with default values overridden by docker-compose.yml
 ARG APP_GID=1000
 ARG APP_UID=1000
 ARG APP_USER=appuser

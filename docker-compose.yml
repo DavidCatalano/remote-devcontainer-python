@@ -2,7 +2,7 @@ services:
   devcontainer:
     container_name: ${CONTAINER_NAME:-ProjectName}
     hostname: ${HOSTNAME:-projectname}
-    image: ${IMAGE_NAME:-ProjectName:latest}
+    image: ${IMAGE_NAME:-projectname:latest}
     build:
       context: .
       args:
@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     volumes:
-      - SyntheticData_src:/app
+      - ${REMOTE_PROJECT_PATH}:/app
     working_dir: /app
     user: "${APP_RUNTIME_GID:-1000}:${APP_RUNTIME_GID:-1000}"
     command: sleep infinity
@@ -25,9 +25,6 @@ services:
             - driver: nvidia
               count: ${NVIDIA_GPU_COUNT:-all}
               capabilities: [gpu]
-
-volumes:
-  SyntheticData_src:
 
 networks:
   default:

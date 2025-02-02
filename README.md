@@ -7,8 +7,9 @@ This repository provides a **fully configured template** for setting up a **remo
 - Work on **a remote container server** rather than a local Docker instance.
 - Need a persistent environment to **run ML utilities and experiments**.
 - Want a **fully isolated, portable**, and reproducible workflow for their projects.
+- Require **two-way file synchronization** between their local machine and the remote container, making it feel like a local devcontainer.
 
-This setup allows for **seamless development in VS Code**, efficient dependency management via `uv`, and optimized GPU utilization for ML workloads.
+This setup allows for **seamless development in VS Code**, efficient dependency management via `uv`, optimized GPU utilization for ML workloads, and **automatic file synchronization using Mutagen**.
 
 ## Key Features
 
@@ -16,13 +17,13 @@ This setup allows for **seamless development in VS Code**, efficient dependency 
 
 ✅ **NVIDIA GPU Support** – Configured for **CUDA 12.6** with flexible GPU options.
 
-✅ **Persistent Docker Volumes** – Source code persists across container rebuilds.
+✅ **Two-Way File Sync (Mutagen)** – Keeps local and remote files in sync, making the remote container behave like a local development environment.
 
 ✅ **Preconfigured Python Environment** – Uses `uv` for fast package management.
 
 ✅ **Non-Root User Execution** – Avoids running the container as `root` for security.
 
-✅ \*\*Minimal\*\* – Base dependencies can be expanded as needed.
+✅ **Minimal Base Dependencies** – Ready for your PIP and APT packages.
 
 ## Getting Started
 
@@ -34,12 +35,29 @@ Ensure your **remote Docker server** meets the following requirements:
 - **NVIDIA GPU** with CUDA support
 - **Docker & NVIDIA Container Toolkit installed**
 - **VS Code with Remote - Containers extension** (for local development)
+- **Passwordless SSH access**
+- **Mutagen installed** on both your **local machine** and the **remote host**.
+
+  #### Local Mutagen Install
+  `brew install mutagen-io/mutagen/mutagen`
+ 
+  #### Remote Host Mutagen Install
+  ```
+  wget https://github.com/mutagen-io/mutagen/releases/download/v0.18.0/mutagen_linux_amd64_v0.18.0.tar.gz
+  tar -xzf mutagen_linux_amd64_v0.18.0.tar.gz
+  sudo mv mutagen /usr/local/bin/
+  tar -tvf mutagen-agents.tar.gz # find the proper binary
+  tar -xzf mutagen-agents.tar.gz linux_amd64 # extract the proper binary
+  sudo mv linux_amd64 /usr/local/bin/mutagen-agents # move and rename the agents binary
+  mutagen daemon start
+  ```
 
 ### 2️⃣ Clone This Repo
 
 ```sh
-git clone [https://github.com/yourusername/your-repo.git](https://github.com/yourusername/your-repo.git)
-cd your-repo
+git clone https://github.com/DavidCatalano/remote-devcontainer-python.git
+mv remote-devcontainer-python ./{YOUR_PROJECT}
+cd {YOUR_PROJECT}
 ```
 
 ### 3️⃣ Set Up Environment Variables
@@ -50,70 +68,77 @@ cp .env.example .env
 ```
 Modify values in `.env` to match your setup.
 
-### 4️⃣ Start the Devcontainer
+### 4️⃣ Prepare the Remote Folder
+Before starting the container, you need to create and set up the remote workspace directory:
+`make prepare-remote-folder`
+This will:
+- Create the necessary folder on the remote Docker server.
+- Set the correct permissions for your user.
+
+### 5️⃣ Start / Stop the Devcontainer
 
 Run the following command to build and start the container:
 ```sh
-docker-compose up -d --build
+make connect
 ```
+This will:
+- Start Mutagen sync (bi-directional file sync).
+- Start the Docker container on the remote server.
+- Ensure all necessary dependencies are installed.
 
-### 5️⃣ Open in VS Code
+```sh
+make disconnect
+```
+This will:
+- Stop Mutagen sync.
+- Stop the Docker container on the remote server.
+
+
+### 6️⃣ Open in VS Code
 
 1. Open VS Code
 2. Use **Remote-Containers: Attach to Running Container**
 3. Select the container **ProjectName**
 
-## Configuration Details
-
-### **Docker & Devcontainer Setup**
-
-This template is built with:
-
-- `nvidia/cuda:12.6.0-devel-ubuntu22.04` as the base image
-- `docker-compose.yml` for container orchestration
-- A preconfigured `devcontainer.json` for VS Code integration
-- Python 3.11 installed manually (as it's not included in CUDA images)
-
-### **GPU Configuration**
-
-By default, all available GPUs are exposed to the container:
-```yaml
-deploy:
-resources:
-reservations:
-devices:
-- driver: nvidia
-count: all
-capabilities: [gpu]
-```
-You can modify this in `.env` using:
-```ini
-NVIDIA_GPU_COUNT=all
-```
-
-### **Preinstalled Tools & Libraries**
-
-This template comes with essential tools for development:
-
-- **CLI Tools**: `wget`, `zip`, `rsync`, `jq`, `vim`, `git-lfs`
-- **Python Tools**: `ruff`, `black`, `mypy`, `pytest`, `requests`, `pydantic`
-- **CUDA Variables**:
-  - `CUDA_HOME=/usr/local/cuda`
-  - `TORCH_CUDA_ARCH_LIST=8.9` (can be overridden in `.env`)
 
 ## Usage Notes
 
-### **Persistent Volumes**
+### **Two-Way File Sync (Mutagen)**
 
-- This template uses a **Docker named volume** (`ProjectName_src`) instead of a host-mounted directory.
-- To reset the container **without losing source code**, just run:
-  ```sh
-  docker-compose down && docker-compose up -d
-  ```
-- To **fully wipe everything** (including source code), run:
-  ```sh
-  docker volume rm ProjectName\_src
-  ```
+- This template uses Mutagen to keep local and remote files in sync, making the remote devcontainer behave like a local environment.
+- Any file changes made locally will sync to the remote container automatically.
+- Any file changes inside the container (e.g., pip install, code edits) sync back to your local machine.
+
+### Available Makefile Commands
+The Makefile provides an automated workflow:
+
+**Container Management**
+```sh
+make build          # Build the Docker image
+make up             # Start the container & sync files
+make down           # Stop the container & stop sync
+make shell          # Open an interactive shell inside the container
+make logs           # View container logs
+```
+
+**Mutagen Sync Management**
+```sh
+make start-sync     # Start file sync (only if not already running)
+make stop-sync      # Stop file sync for this project
+make status-sync    # Check sync status
+```
+
+**Development Tools**
+```sh
+make format         # Run Black & Ruff formatting
+make lint           # Run Ruff linting
+make test           # Run Pytest tests
+make clean          # Remove stopped containers & unused images
+```
+
+### Project Folder Mapping
+- Instead of using Docker named volumes, this template maps a remote folder (`/data/workspaces/{PROJECT_NAME}`) to the container.
+- The folder is persisted across container restarts.
 
 ## Contributing
 
