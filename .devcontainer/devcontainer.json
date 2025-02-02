@@ -1,0 +1,36 @@
+{
+    "name": "ProjectName",
+    "customizations": {
+      "vscode": {
+        "settings": {
+          "python.linting.enabled": true,
+          "python.linting.ruffEnabled": true,
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+          },
+          "files.trimTrailingWhitespace": true,
+          "files.insertFinalNewline": true,
+          "python.formatting.provider": "black",
+          "python.analysis.typeCheckingMode": "strict"
+        },
+        "extensions": [
+          "ms-python.python",
+          "charliermarsh.ruff",
+          "ms-python.black-formatter",
+          "davidanson.vscode-markdownlint",
+          "ms-python.vscode-pylance"
+        ]
+      }
+    },
+    "postCreateCommand": "python -m pip install --upgrade pip && pip install -r requirements-dev.txt && ruff check . --fix",
+    "features": {
+      "ghcr.io/devcontainers/features/python:1": {
+        "version": "3.11"
+      }
+    },
+    "remoteEnv": {
+      "PYTHONPATH": "${workspaceFolder}",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    }
+  }

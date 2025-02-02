@@ -1,40 +1,38 @@
-# Base image
-FROM python:latest
+FROM nvidia/cuda:12.6.0-devel-ubuntu22.04
 
-# Set ARG values from docker-compose
-ARG DEV_ENV
-ARG DEV_NAME
-ARG DEV_HOST
-ARG CONTAINER_NAME
+# Set up non-interactive mode for apt-get
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Assign ARGs to ENV vars so they can be used at runtime
-ENV DEV_ENV=${DEV_ENV}
-ENV DEV_NAME=${DEV_NAME}
-ENV DEV_HOST=${DEV_HOST}
-ENV CONTAINER_NAME=${CONTAINER_NAME}
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3.11 python3.11-venv python3.11-dev python3-pip \
+    git curl wget zip rsync jq vim git-lfs && \
+    ln -sf /usr/bin/python3.11 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip && \
+    pip install --upgrade pip uv && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Git
-RUN apt-get update && \
-    apt-get install -y git
+# Set build-time arguments
+ARG APP_GID=1000
+ARG APP_UID=1000
+ARG APP_USER=appuser
+ARG APP_GROUP=appgroup
+ARG TORCH_CUDA_ARCH_LIST=8.9
 
-# Install dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# Set environment variables
+ENV PYTHONPATH="/app" \
+    CUDA_HOME="/usr/local/cuda" \
+    TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST}"
 
-# Install pipx
-RUN pip install --no-cache-dir --upgrade pipx
+# Create group and user
+RUN groupadd -g ${APP_GID} ${APP_GROUP} && \
+    useradd -u ${APP_UID} -g ${APP_GROUP} -m ${APP_USER}
 
-# Copy the script and dev requirements file, then run the script
-COPY requirements-dev.txt .
-COPY install_dev_packages.sh .
-# RUN chmod +x install_dev_packages.sh && \
-#     if [ "${DEV_ENV}" = "1" ] ; then sh install_dev_packages.sh ; fi
-RUN chmod +x install_dev_packages.sh && sh install_dev_packages.sh
+# Set a friendly bash prompt
+RUN echo "export PS1='\u@\h:\w\$ '" >> /home/${APP_USER}/.bashrc
 
+# Switch to non-root user
+USER ${APP_USER}:${APP_GROUP}
 
-
-# Set working directory
+# Set up working directory
 WORKDIR /app
-
-# Keep container alive
-ENTRYPOINT ["tail", "-f", "/dev/null"]

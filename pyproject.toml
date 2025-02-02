@@ -1,0 +1,39 @@
+[project]
+name = "ProjectName"
+version = "0.1.0"
+description = "Base template for NVIDIA-enabled Python projects on remote docker server"
+authors = [{ name = "user", email = "email@domain.com" }]
+dependencies = [
+    "pydantic",
+    "watchfiles"
+]
+
+[tool.uv]
+resolver = "fast"
+dependencies = [
+    "ruff",
+    "black",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "types-requests",
+    "types-setuptools",
+    "sphinx-autodoc-typehints"
+]
+
+[tool.ruff]
+line-length = 99
+exclude = ["migrations", "__pycache__"]
+extend-ignore = ["F403"]
+select = ["E", "W", "F"]
+
+[tool.isort]
+known_third_party = ["requests", "numpy"]
+known_first_party = ["my_project"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.black]
+line-length = 99
+
+[tool.mypy]
+strict = true
