@@ -1,2 +1,26 @@
-.env
+# macOS-specific files
 .DS_Store
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python caches and virtual environment
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+*.pth
+
+# JWT or other generated secrets
+generated-jwt.txt
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# VS Code settings (optional, if you use VS Code but don't want to track workspace settings)
+.vscode/
