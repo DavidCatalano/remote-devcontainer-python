@@ -42,10 +42,10 @@ clean:
 # Ensure the remote project directory exists with the correct permissions
 prepare-remote-folder:
 	ssh $(REMOTE_HOST) "bash -c '\
-		if ! mkdir -p $(REMOTE_PROJECT_PATH) || ! chown $(APP_UID):$(APP_GID) $(REMOTE_PROJECT_PATH); then \
-			echo -e \"\033[1;31mPermission denied. Run this command from your local machine:\033[0m\"; \
-			echo -e \"\033[1;33m  ssh -t $(REMOTE_HOST) \\\"sudo mkdir -p $(REMOTE_PROJECT_PATH) && sudo chown $(APP_UID):$(APP_GID) $(REMOTE_PROJECT_PATH)\\\"\033[0m\"; \
-			exit 1; \
+		if [ ! -d \"$(REMOTE_PROJECT_PATH)\" ]; then \
+			sudo mkdir -p $(REMOTE_PROJECT_PATH) && sudo chown $(APP_UID):$(APP_GID) $(REMOTE_PROJECT_PATH); \
+		else \
+			echo \"$(REMOTE_PROJECT_PATH) already exists. Skipping creation.\"; \
 		fi'"
 
 # Start Mutagen sync (only if no session exists)

@@ -75,9 +75,13 @@ This will:
 - Create the necessary folder on the remote Docker server.
 - Set the correct permissions for your user.
 
-### 5️⃣ Start / Stop the Devcontainer
+### 5️⃣ Build / Start / Stop the Devcontainer
+**Build** the container:
+```sh
+make build
+```
 
-Run the following command to build and start the container:
+**Start** the container:
 ```sh
 make connect
 ```
@@ -86,6 +90,7 @@ This will:
 - Start the Docker container on the remote server.
 - Ensure all necessary dependencies are installed.
 
+**Stop** the container:
 ```sh
 make disconnect
 ```
