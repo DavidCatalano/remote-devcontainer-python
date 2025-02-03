@@ -6,6 +6,15 @@ export
 # Build the Docker image
 build:
 	docker build -t $(IMAGE_NAME) .
+build-no-cache:
+	docker-compose build --no-cache
+
+# Initialize the Python project inside the container
+init:
+	docker exec -it $(CONTAINER_NAME) uv pip sync --system pyproject.toml
+	docker exec -it $(CONTAINER_NAME) uv pip list
+init-dev:
+	docker exec -it $(CONTAINER_NAME) uv pip sync --system 'pyproject.toml[dev]'
 
 # Start the container and enable Mutagen sync
 up: start-sync

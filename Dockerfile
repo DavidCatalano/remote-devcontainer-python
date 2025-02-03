@@ -28,11 +28,13 @@ ENV PYTHONPATH="/app" \
 RUN groupadd -g ${APP_GID} ${APP_GROUP} && \
     useradd -u ${APP_UID} -g ${APP_GROUP} -m ${APP_USER}
 
-# Create a directory for the application with group inheritance
-RUN mkdir -p /app && \
-    chown ${APP_UID}:${APP_GID} /app && \
-    chmod g+rwX /app && \
-    chmod g+s /app
+# Cheat codes (use temporarily when testing, then add above ^)
+# RUN echo "${APP_USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# RUN echo "${APP_USER} ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get" >> /etc/sudoers
+
+# Allow the user to install Python packages in the common directories
+RUN chown -R ${APP_UID}:${APP_GID} /usr/local/lib/python3.11/dist-packages /usr/local/bin && \
+    chmod -R g+rwX /usr/local/lib/python3.11/dist-packages /usr/local/bin
 
 # Set up bash prompt and umask persistence
 RUN echo "umask 0007" >> /home/${APP_USER}/.bashrc && \
