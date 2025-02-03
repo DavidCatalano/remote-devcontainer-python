@@ -43,9 +43,10 @@ clean:
 prepare-remote-folder:
 	ssh $(REMOTE_HOST) "bash -c '\
 		if [ ! -d \"$(REMOTE_PROJECT_PATH)\" ]; then \
-			sudo mkdir -p $(REMOTE_PROJECT_PATH) && sudo chown $(APP_UID):$(APP_GID) $(REMOTE_PROJECT_PATH); \
-		else \
-			echo \"$(REMOTE_PROJECT_PATH) already exists. Skipping creation.\"; \
+			sudo mkdir -p \"$(REMOTE_PROJECT_PATH)\"; \
+			sudo chown $(APP_UID):$(APP_GID) \"$(REMOTE_PROJECT_PATH)\"; \
+			sudo chmod g+rwX \"$(REMOTE_PROJECT_PATH)\"; \
+			sudo chmod g+s \"$(REMOTE_PROJECT_PATH)\"; \
 		fi'"
 
 # Start Mutagen sync (only if no session exists)
@@ -53,7 +54,14 @@ start-sync:
 	@if mutagen sync list | grep -q "$(CONTAINER_NAME)"; then \
 		echo "Mutagen sync already running for $(CONTAINER_NAME)"; \
 	else \
-		mutagen sync create --sync-mode=two-way-resolved --ignore-vcs --name=$(CONTAINER_NAME) $(LOCAL_PROJECT_PATH) $(REMOTE_HOST):$(REMOTE_PROJECT_PATH); \
+		mutagen sync create \
+		  --ignore-vcs \
+		  --sync-mode=two-way-resolved \
+		  --default-file-mode=0660 \
+		  --default-directory-mode=0770 \
+		  --default-group-beta=$(APP_GROUP) \
+		  --name=$(CONTAINER_NAME) \
+		  $(LOCAL_PROJECT_PATH) $(REMOTE_HOST):$(REMOTE_PROJECT_PATH); \
 	fi
 
 # Stop Mutagen sync for this project only

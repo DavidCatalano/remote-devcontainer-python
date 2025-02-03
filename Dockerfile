@@ -28,8 +28,15 @@ ENV PYTHONPATH="/app" \
 RUN groupadd -g ${APP_GID} ${APP_GROUP} && \
     useradd -u ${APP_UID} -g ${APP_GROUP} -m ${APP_USER}
 
-# Set a friendly bash prompt
-RUN echo "export PS1='\u@\h:\w\$ '" >> /home/${APP_USER}/.bashrc
+# Create a directory for the application with group inheritance
+RUN mkdir -p /app && \
+    chown ${APP_UID}:${APP_GID} /app && \
+    chmod g+rwX /app && \
+    chmod g+s /app
+
+# Set up bash prompt and umask persistence
+RUN echo "umask 0007" >> /home/${APP_USER}/.bashrc && \
+    echo "export PS1='\u@\h:\w\$ '" >> /home/${APP_USER}/.bashrc
 
 # Switch to non-root user
 USER ${APP_USER}:${APP_GROUP}

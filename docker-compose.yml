@@ -16,7 +16,7 @@ services:
     volumes:
       - ${REMOTE_PROJECT_PATH}:/app
     working_dir: /app
-    user: "${APP_RUNTIME_GID:-1000}:${APP_RUNTIME_GID:-1000}"
+    user: "${APP_USER:-synth}"
     command: sleep infinity
     deploy:
       resources:
